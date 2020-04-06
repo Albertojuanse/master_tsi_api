@@ -14,7 +14,7 @@ import gevent
 import time
 import signal
 from argparse import RawTextHelpFormatter
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from gevent.pywsgi import WSGIServer
 
 BASE_DE_DATOS = [
@@ -101,7 +101,7 @@ def parse_args():
 @app.route('/medida', methods=['GET'])
 def medida_get():
     """
-            Función: test_get_variable
+            Función: medida_get
             Descripción: Esta función procesa una petición GET sobre la URL /test seguida de un número (por ejemplo /test/1)
             Retorno: Devuelve un JSON que contiene el resultado de la operación
     """
@@ -125,15 +125,15 @@ def medida_get():
     respuesta = {medida["id"]: medida for medida in medidas}
 
     # Devuelve la respuesta en formato de intercambio JSON
-    return jsonify(respuesta)
+    return Response('Las medidas se han borrado', 204)
 
 
 @app.route('/medida', methods=['POST'])
 def medida_post():
     """
-            Función: test_get_variable
-            Descripción: Esta función procesa una petición GET sobre la URL /test seguida de un número (por ejemplo /test/1)
-            Retorno: Devuelve un JSON que contiene el resultado de la operación
+            Función: medida_post
+            Descripción: Esta función procesa una petición POST sobre la URL /medida
+            Retorno: Devuelve un código 200 si el recurso se ha alojado
     """
 
     # Se lee la petición
@@ -160,9 +160,9 @@ def medida_post():
 @app.route('/medida', methods=['DELETE'])
 def medida_delete():
     """
-            Función: test_get_variable
-            Descripción: Esta función procesa una petición GET sobre la URL /test seguida de un número (por ejemplo /test/1)
-            Retorno: Devuelve un JSON que contiene el resultado de la operación
+            Función: medida_delete
+            Descripción: Esta función procesa una petición DELETE sobre la URL /medida
+            Retorno: Devuelve un código 204 si se ha borrado
     """
 
     # Se lee la petición
@@ -177,13 +177,16 @@ def medida_delete():
     if puerto:
         logging.info('[/medida][GET] La petición indica el puerto {}'.format(puerto))
 
-    # Se compone la respuesta
-    respuesta = {
-        'result': 'Ok'
-    }
+    # Se recupera la información
+    medidas = buscarMedida(ident=ident, ip=ip, puerto=puerto)
 
-    # Devuelve la respuesta en formato de intercambio JSON
-    return jsonify(respuesta)
+    # Se borran las entradas encontradas
+    for medida in medidas:
+        medida_id = medida["id"]
+        BASE_DE_DATOS.pop(medida_id)
+
+    # Devuelve la respuesta
+    return Response("Se ha eliminado el recurso", 204)
 
 
 def buscarMedida(ident=None, ip=None, puerto=None):
