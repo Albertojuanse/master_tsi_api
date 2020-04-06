@@ -125,7 +125,7 @@ def medida_get():
     respuesta = {medida["id"]: medida for medida in medidas}
 
     # Devuelve la respuesta en formato de intercambio JSON
-    return Response('Las medidas se han borrado', 204)
+    return jsonify(respuesta)
 
 
 @app.route('/medida', methods=['POST'])
@@ -140,28 +140,28 @@ def medida_post():
     logging.info('[/medida][GET] He recibido GET a método /medida')
     ident = request.args.get('id')
     if ident:
-        logging.info('[/medida][GET] La petición indica un ident: {}'.format(ident))
+        logging.info('[/medida][POST] La petición indica un ident: {}'.format(ident))
     ip = request.args.get('ip')
     if ip:
-        logging.info('[/medida][GET] La petición indica una ip: {}'.format(ip))
+        logging.info('[/medida][POST] La petición indica una ip: {}'.format(ip))
     puerto = request.args.get('port')
     if puerto:
-        logging.info('[/medida][GET] La petición indica el puerto {}'.format(puerto))
+        logging.info('[/medida][POST] La petición indica el puerto {}'.format(puerto))
     descripcion = request.args.get('descripcion')
     if descripcion:
-        logging.info('[/medida][GET] La petición indica la descripcion {}'.format(descripcion))
+        logging.info('[/medida][POST] La petición indica la descripcion {}'.format(descripcion))
     tipo = request.args.get('tipo')
     if tipo:
-        logging.info('[/medida][GET] La petición indica el tipo {}'.format(tipo))
+        logging.info('[/medida][POST] La petición indica el tipo {}'.format(tipo))
     valor = request.args.get('valor')
     if valor:
-        logging.info('[/medida][GET] La petición indica el valor {}'.format(valor))
+        logging.info('[/medida][POST] La petición indica el valor {}'.format(valor))
     parametro = request.args.get('parametro')
     if parametro:
-        logging.info('[/medida][GET] La petición indica el parametro {}'.format(parametro))
+        logging.info('[/medida][POST] La petición indica el parametro {}'.format(parametro))
     protocolo = request.args.get('protocolo')
     if protocolo:
-        logging.info('[/medida][GET] La petición indica el protocolo {}'.format(protocolo))
+        logging.info('[/medida][POST] La petición indica el protocolo {}'.format(protocolo))
 
     # Se busca un id
     nuevo_ident = ident
@@ -192,16 +192,16 @@ def medida_delete():
     """
 
     # Se lee la petición
-    logging.info('[/medida][GET] He recibido GET a método /medida')
+    logging.info('[/medida][DELETE] He recibido GET a método /medida')
     ident = request.args.get('id')
     if ident:
-        logging.info('[/medida][GET] La petición indica un ident: {}'.format(ident))
+        logging.info('[/medida][DELETE] La petición indica un ident: {}'.format(ident))
     ip = request.args.get('ip')
     if ip:
-        logging.info('[/medida][GET] La petición indica una ip: {}'.format(ip))
+        logging.info('[/medida][DELETE] La petición indica una ip: {}'.format(ip))
     puerto = request.args.get('port')
     if puerto:
-        logging.info('[/medida][GET] La petición indica el puerto {}'.format(puerto))
+        logging.info('[/medida][DELETE] La petición indica el puerto {}'.format(puerto))
 
     # Se recupera la información
     medidas = buscarMedida(ident=ident, ip=ip, puerto=puerto)
@@ -287,6 +287,7 @@ def crearMedida(ident=None,
             "protocolo": protocolo,
         },
     }
+
 
 if __name__ == '__main__':
   
