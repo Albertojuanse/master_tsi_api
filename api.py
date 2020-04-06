@@ -17,14 +17,56 @@ from argparse import RawTextHelpFormatter
 from flask import Flask, jsonify, request
 from gevent.pywsgi import WSGIServer
 
-BASE_DE_DATOS = {
-    '1': {
-        
+BASE_DE_DATOS = [
+    {
+        "id": 1,
+        "tiempo": 1586182998.944152,
+        "descripcion": "Ancho de banda de la interfaz ETH-0",
+        "tipo": "Ancho de banda",
+        "medidas_parciales":{
+            "valor": 0.5,
+            "parametro": "velocidad",
+        },
+        "valida": 1,
+        "Datos de direccionamiento": {
+            "direccion IP": "8.8.8.8",
+            "puerto": 80,
+            "protocolo": "TCP",
+        },
     },
-    '2': {
-        
-    }
-}
+    {
+        "id": 2,
+        "tiempo": 1586183000.944152,
+        "descripcion": "Ancho de banda de la interfaz ETH-1",
+        "tipo": "Ancho de banda",
+        "medidas_parciales":{
+            "valor": 0.5,
+            "parametro": "velocidad",
+        },
+        "valida": 1,
+        "Datos de direccionamiento": {
+            "direccion IP": "7.7.7.7",
+            "puerto": 100,
+            "protocolo": "TCP",
+        },
+    },
+    {
+        "id": 3,
+        "tiempo": 1586183998.944152,
+        "descripcion": "Ancho de banda de la interfaz ETH-2",
+        "tipo": "Ancho de banda",
+        "medidas_parciales":{
+            "valor": 0.5,
+            "parametro": "velocidad",
+        },
+        "valida": 1,
+        "Datos de direccionamiento": {
+            "direccion IP": "9.9.9.9",
+            "puerto": 90,
+            "protocolo": "TCP",
+        },
+    },
+]
 
 # Aplicación Flask apara implementar los métodos de la API REST
 app = Flask(__name__)
@@ -57,7 +99,7 @@ def parse_args():
 
 
 @app.route('/medida', methods=['GET'])
-def test_get_variable(id):
+def medida_get():
     """
             Función: test_get_variable
             Descripción: Esta función procesa una petición GET sobre la URL /test seguida de un número (por ejemplo /test/1)
@@ -66,27 +108,28 @@ def test_get_variable(id):
 
     # Se lee la petición
     logging.info('[/medida][GET] He recibido GET a método /medida')
-    id = request.args.get('id')
-    if id:
-        logging.info('[/medida][GET] La petición indica un id: {}'.format(id))
+    ident = request.args.get('id')
+    if ident:
+        logging.info('[/medida][GET] La petición indica un ident: {}'.format(ident))
     ip = request.args.get('ip')
     if ip:
         logging.info('[/medida][GET] La petición indica una ip: {}'.format(ip))
-    port = request.args.get('port')
-    if port:
-        logging.info('[/medida][GET] La petición indica el port {}'.format(port))
+    puerto = request.args.get('port')
+    if puerto:
+        logging.info('[/medida][GET] La petición indica el puerto {}'.format(puerto))
+
+    # Se recupera la información
+    medidas = buscarMedida(ident=ident, ip=ip, puerto=puerto)
 
     # Se compone la respuesta
-    respuesta = {
-        'result':'Ok'
-    }
+    respuesta = {medida["id"]: medida for medida in medidas}
 
     # Devuelve la respuesta en formato de intercambio JSON
     return jsonify(respuesta)
 
 
 @app.route('/medida', methods=['POST'])
-def test_get_variable(id):
+def medida_post():
     """
             Función: test_get_variable
             Descripción: Esta función procesa una petición GET sobre la URL /test seguida de un número (por ejemplo /test/1)
@@ -95,15 +138,15 @@ def test_get_variable(id):
 
     # Se lee la petición
     logging.info('[/medida][GET] He recibido GET a método /medida')
-    id = request.args.get('id')
-    if id:
-        logging.info('[/medida][GET] La petición indica un id: {}'.format(id))
+    ident = request.args.get('id')
+    if ident:
+        logging.info('[/medida][GET] La petición indica un ident: {}'.format(ident))
     ip = request.args.get('ip')
     if ip:
         logging.info('[/medida][GET] La petición indica una ip: {}'.format(ip))
-    port = request.args.get('port')
-    if port:
-        logging.info('[/medida][GET] La petición indica el puerto {}'.format(port))
+    puerto = request.args.get('port')
+    if puerto:
+        logging.info('[/medida][GET] La petición indica el puerto {}'.format(puerto))
 
     # Se compone la respuesta
     respuesta = {
@@ -115,7 +158,7 @@ def test_get_variable(id):
 
 
 @app.route('/medida', methods=['DELETE'])
-def test_get_variable(id):
+def medida_delete():
     """
             Función: test_get_variable
             Descripción: Esta función procesa una petición GET sobre la URL /test seguida de un número (por ejemplo /test/1)
@@ -124,15 +167,15 @@ def test_get_variable(id):
 
     # Se lee la petición
     logging.info('[/medida][GET] He recibido GET a método /medida')
-    id = request.args.get('id')
-    if id:
-        logging.info('[/medida][GET] La petición indica un id: {}'.format(id))
+    ident = request.args.get('id')
+    if ident:
+        logging.info('[/medida][GET] La petición indica un ident: {}'.format(ident))
     ip = request.args.get('ip')
     if ip:
         logging.info('[/medida][GET] La petición indica una ip: {}'.format(ip))
-    port = request.args.get('port')
-    if port:
-        logging.info('[/medida][GET] La petición indica el puerto {}'.format(port))
+    puerto = request.args.get('port')
+    if puerto:
+        logging.info('[/medida][GET] La petición indica el puerto {}'.format(puerto))
 
     # Se compone la respuesta
     respuesta = {
@@ -141,6 +184,54 @@ def test_get_variable(id):
 
     # Devuelve la respuesta en formato de intercambio JSON
     return jsonify(respuesta)
+
+
+def buscarMedida(ident=None, ip=None, puerto=None):
+
+    medidas_candidatas_ident = []
+    medidas_candidatas_ip = []
+    medidas_candidatas_puerto = []
+    
+    for medida in BASE_DE_DATOS:
+        
+        if ident:
+            
+            ident_medida = medida["id"]
+            if str(ident) == str(ident_medida):
+                medidas_candidatas_ident.append(medida)
+        
+        if ip:
+
+            ip_medida = medida["Datos de direccionamiento"]["direccion IP"]
+            if ip == ip_medida:
+                medidas_candidatas_ip.append(medida)
+        
+        if puerto:
+
+            puerto_medida = medida["Datos de direccionamiento"]["puerto"]
+            if str(puerto) == str(puerto_medida):
+                medidas_candidatas_puerto.append(medida)
+
+    id_medidas = []
+    for medida in medidas_candidatas_ident:
+        medida_idet = medida["id"]
+        id_medidas.append(medida_idet)
+    for medida in medidas_candidatas_ip:
+        medida_idet = medida["id"]
+        id_medidas.append(medida_idet)
+    for medida in medidas_candidatas_puerto:
+        medida_idet = medida["id"]
+        id_medidas.append(medida_idet)
+    set_medidas = list(set(id_medidas))
+
+    medidas = []
+    for medida in BASE_DE_DATOS:
+        for medida_ident in set_medidas:
+            ident_medida_guardada = medida["id"]
+            if ident_medida_guardada == medida_ident:
+                medidas.append(medida)
+
+    return medidas
 
 
 if __name__ == '__main__':
