@@ -147,11 +147,37 @@ def medida_post():
     puerto = request.args.get('port')
     if puerto:
         logging.info('[/medida][GET] La petición indica el puerto {}'.format(puerto))
+    descripcion = request.args.get('descripcion')
+    if descripcion:
+        logging.info('[/medida][GET] La petición indica la descripcion {}'.format(descripcion))
+    tipo = request.args.get('tipo')
+    if tipo:
+        logging.info('[/medida][GET] La petición indica el tipo {}'.format(tipo))
+    valor = request.args.get('valor')
+    if valor:
+        logging.info('[/medida][GET] La petición indica el valor {}'.format(valor))
+    parametro = request.args.get('parametro')
+    if parametro:
+        logging.info('[/medida][GET] La petición indica el parametro {}'.format(parametro))
+    protocolo = request.args.get('protocolo')
+    if protocolo:
+        logging.info('[/medida][GET] La petición indica el protocolo {}'.format(protocolo))
+
+    # Se busca un id
+    nuevo_ident = ident
+    medidas = buscarMedida(ident=ident)
+    if len(medidas) > 0:
+        nuevo_ident = len(BASE_DE_DATOS) + 1
 
     # Se compone la respuesta
-    respuesta = {
-        'result': 'Ok'
-    }
+    respuesta = crearMedida(ident=nuevo_ident,
+                            descripcion=descripcion,
+                            tipo=tipo,
+                            valor=valor,
+                            parametro=parametro,
+                            ip=ip,
+                            puerto=puerto,
+                            protocolo=protocolo)
 
     # Devuelve la respuesta en formato de intercambio JSON
     return jsonify(respuesta)
@@ -236,6 +262,31 @@ def buscarMedida(ident=None, ip=None, puerto=None):
 
     return medidas
 
+
+def crearMedida(ident=None,
+                descripcion="Desconocido",
+                tipo="Desconocido",
+                valor=0,
+                parametro="Desconocido",
+                ip="0.0.0.0",
+                puerto="0",
+                protocolo="Desconocido"):
+    return {
+        "id": ident,
+        "tiempo": time.time(),
+        "descripcion": descripcion,
+        "tipo": tipo,
+        "medidas_parciales": {
+            "valor": valor,
+            "parametro": parametro,
+        },
+        "valida": 1,
+        "Datos de direccionamiento": {
+            "direccion IP": ip,
+            "puerto": puerto,
+            "protocolo": protocolo,
+        },
+    }
 
 if __name__ == '__main__':
   
