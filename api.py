@@ -17,56 +17,6 @@ from argparse import RawTextHelpFormatter
 from flask import Flask, jsonify, request, Response
 from gevent.pywsgi import WSGIServer
 
-BASE_DE_DATOS = [
-    {
-        "id": 1,
-        "tiempo": 1586182998.944152,
-        "descripcion": "Ancho de banda de la interfaz ETH-0",
-        "tipo": "Ancho de banda",
-        "medidas_parciales":{
-            "valor": 0.5,
-            "parametro": "velocidad",
-        },
-        "valida": 1,
-        "Datos de direccionamiento": {
-            "direccion IP": "8.8.8.8",
-            "puerto": 80,
-            "protocolo": "TCP",
-        },
-    },
-    {
-        "id": 2,
-        "tiempo": 1586183000.944152,
-        "descripcion": "Ancho de banda de la interfaz ETH-1",
-        "tipo": "Ancho de banda",
-        "medidas_parciales":{
-            "valor": 0.5,
-            "parametro": "velocidad",
-        },
-        "valida": 1,
-        "Datos de direccionamiento": {
-            "direccion IP": "7.7.7.7",
-            "puerto": 100,
-            "protocolo": "TCP",
-        },
-    },
-    {
-        "id": 3,
-        "tiempo": 1586183998.944152,
-        "descripcion": "Ancho de banda de la interfaz ETH-2",
-        "tipo": "Ancho de banda",
-        "medidas_parciales":{
-            "valor": 0.5,
-            "parametro": "velocidad",
-        },
-        "valida": 1,
-        "Datos de direccionamiento": {
-            "direccion IP": "9.9.9.9",
-            "puerto": 90,
-            "protocolo": "TCP",
-        },
-    },
-]
 
 # Aplicación Flask apara implementar los métodos de la API REST
 app = Flask(__name__)
@@ -80,6 +30,9 @@ def signal_handler(sig, frame):
             Descripción: Esta función se ejecuta cuando se pulsa ctrl+c y cierra el programa
             Retorno: Ninguno
     """
+    # cargar base de datos
+    with open("base_de_datos.json", "w") as BASE_DE_DATOS_JSON:
+        json.dump(BASE_DE_DATOS, BASE_DE_DATOS_JSON)
     sys.exit(0)
 
 
@@ -209,7 +162,7 @@ def medida_delete():
     # Se borran las entradas encontradas
     for medida in medidas:
         medida_id = medida["id"]
-        BASE_DE_DATOS.pop(medida_id)
+        BASE_DE_DATOS.pop(str(medida_id))
 
     # Devuelve la respuesta
     return Response("Se ha eliminado el recurso", 204)
@@ -221,8 +174,10 @@ def buscarMedida(ident=None, ip=None, puerto=None):
     medidas_candidatas_ip = []
     medidas_candidatas_puerto = []
     
-    for medida in BASE_DE_DATOS:
-        
+    for clave in BASE_DE_DATOS:
+
+        medida = BASE_DE_DATOS[clave]
+
         if ident:
             
             ident_medida = medida["id"]
@@ -254,7 +209,10 @@ def buscarMedida(ident=None, ip=None, puerto=None):
     set_medidas = list(set(id_medidas))
 
     medidas = []
-    for medida in BASE_DE_DATOS:
+    for clave in BASE_DE_DATOS:
+
+        medida = BASE_DE_DATOS[clave]
+
         for medida_ident in set_medidas:
             ident_medida_guardada = medida["id"]
             if ident_medida_guardada == medida_ident:
@@ -290,7 +248,6 @@ def crearMedida(ident=None,
 
 
 if __name__ == '__main__':
-  
     # Main section.
     parse_args()
     if args.debug:
@@ -299,6 +256,10 @@ if __name__ == '__main__':
         logging.basicConfig(level = logging.INFO, format = '[%(asctime)s %(levelname)s]\t%(message)s')
 
     signal.signal(signal.SIGINT, signal_handler)
+
+    # cargar base de datos
+    with open("base_de_datos.json", "r") as BASE_DE_DATOS_JSON:
+        BASE_DE_DATOS = json.load(BASE_DE_DATOS_JSON)
 
     logging.info('API  REST escuchando en {}:{}'.format(args.ip, args.port))
     # inicializar el servidor Web asociado a la API REST
