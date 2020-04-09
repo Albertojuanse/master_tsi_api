@@ -90,50 +90,28 @@ def medida_post():
     """
 
     # Se lee la petición
-    logging.info('[/medida][GET] He recibido GET a método /medida')
-    ident = request.args.get('id')
-    if ident:
-        logging.info('[/medida][POST] La petición indica un ident: {}'.format(ident))
-    ip = request.args.get('ip')
-    if ip:
-        logging.info('[/medida][POST] La petición indica una ip: {}'.format(ip))
-    puerto = request.args.get('port')
-    if puerto:
-        logging.info('[/medida][POST] La petición indica el puerto {}'.format(puerto))
-    descripcion = request.args.get('descripcion')
-    if descripcion:
-        logging.info('[/medida][POST] La petición indica la descripcion {}'.format(descripcion))
-    tipo = request.args.get('tipo')
-    if tipo:
-        logging.info('[/medida][POST] La petición indica el tipo {}'.format(tipo))
-    valor = request.args.get('valor')
-    if valor:
-        logging.info('[/medida][POST] La petición indica el valor {}'.format(valor))
-    parametro = request.args.get('parametro')
-    if parametro:
-        logging.info('[/medida][POST] La petición indica el parametro {}'.format(parametro))
-    protocolo = request.args.get('protocolo')
-    if protocolo:
-        logging.info('[/medida][POST] La petición indica el protocolo {}'.format(protocolo))
+    logging.info('[/medida][POST] He recibido POST a método /medida')
+    datos = request.json
 
+    logging.info('[/medida][POST] La petición contiene un JSON {}:'.format(datos))
     # Se busca un id
-    nuevo_ident = ident
-    medidas = buscarMedida(ident=ident)
-    if len(medidas) > 0:
-        nuevo_ident = len(BASE_DE_DATOS) + 1
+    max_ident = 0
+    for clave in BASE_DE_DATOS:
+        medida = BASE_DE_DATOS[clave]
+        cada_ident = int(medida["id"])
+        if cada_ident > max_ident:
+            max_ident = cada_ident
+    nuevo_ident = max_ident + 1
+
+    logging.info('[/medida][POST] Al nuevo recurso se le asigna el ID {}:'.format(nuevo_ident))
 
     # Se compone la respuesta
-    respuesta = crearMedida(ident=nuevo_ident,
-                            descripcion=descripcion,
-                            tipo=tipo,
-                            valor=valor,
-                            parametro=parametro,
-                            ip=ip,
-                            puerto=puerto,
-                            protocolo=protocolo)
+    datos["id"] = nuevo_ident
+    BASE_DE_DATOS[str(nuevo_ident)] = datos
+    logging.info('[/medida][POST] La base de datos se ha actualizado: {}:'.format(BASE_DE_DATOS))
 
-    # Devuelve la respuesta en formato de intercambio JSON
-    return jsonify(respuesta)
+    # Respuesta
+    return Response("<!DOCTYPE HTML><head></head><body><h1>Se ha añadido el recurso</h1></body></html>", 200)
 
 
 @app.route('/medida', methods=['DELETE'])

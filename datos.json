@@ -1,0 +1,16 @@
+{
+    "id": 1,
+    "tiempo": 1586134998.944152,
+    "descripcion": "Ancho de banda de la interfaz ETH-0",
+    "tipo": "Ancho de banda",
+    "medidas_parciales": {
+        "valor": 0.5,
+        "parametro": "velocidad"
+    },
+    "valida": 1,
+    "Datos de direccionamiento": {
+        "direccion IP": "4.4.4.4",
+        "puerto": 110,
+        "protocolo": "TCP"
+    }
+}
