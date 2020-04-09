@@ -77,8 +77,11 @@ def medida_get():
     # Se compone la respuesta
     respuesta = {medida["id"]: medida for medida in medidas}
 
-    # Devuelve la respuesta en formato de intercambio JSON
-    return jsonify(respuesta)
+    if len(respuesta) > 0:
+        # Devuelve la respuesta en formato de intercambio JSON
+        return jsonify(respuesta)
+    else:
+        return Response("<!DOCTYPE HTML><head></head><body><h1>404: Recurso no encontrado</h1></body></html>", 404)
 
 
 @app.route('/medida', methods=['POST'])
@@ -142,8 +145,11 @@ def medida_delete():
         medida_id = medida["id"]
         BASE_DE_DATOS.pop(str(medida_id))
 
-    # Devuelve la respuesta
-    return Response("Se ha eliminado el recurso", 204)
+    if len(medidas) > 0:
+        # Devuelve la respuesta
+        return Response("Se ha eliminado el recurso", 204)
+    else:
+        return Response("<!DOCTYPE HTML><head></head><body><h1>404: Recurso no encontrado</h1></body></html>", 404)
 
 
 def buscarMedida(ident=None, ip=None, puerto=None):
