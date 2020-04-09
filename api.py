@@ -123,7 +123,7 @@ def medida_delete():
     """
 
     # Se lee la petición
-    logging.info('[/medida][DELETE] He recibido GET a método /medida')
+    logging.info('[/medida][DELETE] He recibido DELETE a método /medida')
     ident = request.args.get('id')
     if ident:
         logging.info('[/medida][DELETE] La petición indica un ident: {}'.format(ident))
